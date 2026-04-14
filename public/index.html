@@ -8,21 +8,44 @@
 </head>
 <body>
 <div class="container">
-    <h1>My Dashboard</h1>
+    <h1>Finance Dashboard</h1>
 
-    <section class="accounts-section">
-        <h2>Accounts</h2>
-        <ul id="accounts-list">
-        </ul>
+    <section class="card">
+        <h2>Your Accounts</h2>
+        <ul id="accounts-list"></ul>
+
+        <hr>
+        <h3>Create New Account</h3>
+        <form id="add-account-form">
+            <input type="text" id="account-name" placeholder="Account Name" required>
+            <input type="number" id="account-balance" placeholder="Initial Balance" step="0.01" required>
+            <button type="submit">Create Account</button>
+        </form>
     </section>
 
-    <section class="add-account-section">
-        <h2>Add New Account</h2>
-        <form id="add-account-form">
-            <input type="text" id="account-name" placeholder="Account Name (e.g. Checking)" required>
-            <input type="number" id="account-balance" placeholder="Initial Balance" step="0.01" required>
-            <button type="submit">Add Account</button>
+    <section class="card">
+        <h2>Add Transaction</h2>
+        <form id="add-transaction-form">
+            <select id="trans-account-id" required>
+                <option value="" disabled selected>Select Account</option>
+            </select>
+            <select id="trans-type" required>
+                <option value="EXPENSE">Expense (-)</option>
+                <option value="INCOME">Income (+)</option>
+            </select>
+            <input type="number" id="trans-amount" placeholder="Amount" step="0.01" required>
+            <input type="text" id="trans-category" placeholder="Category (e.g. Food, Rent)" required>
+            <input type="text" id="trans-description" placeholder="Description">
+            <button type="submit">Save Transaction</button>
         </form>
+    </section>
+
+    <section class="card">
+        <h2>Transaction History</h2>
+        <div id="transactions-container">
+            <p>Select an account in the dashboard to see details (Coming soon) or see all below:</p>
+            <ul id="global-transactions-list"></ul>
+        </div>
     </section>
 </div>
 

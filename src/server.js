@@ -7,8 +7,8 @@ const transactionRoutes = require('./routes/transactions');
 
 const app = express();
 
-app.use(express.json()); // Wichtig, damit wir req.body lesen können
-app.use(express.static(path.join(__dirname, '../public'))); // Stellt dein HTML/CSS/JS bereit
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);

@@ -17,7 +17,6 @@ exports.createAccount = async (req, res) => {
             'INSERT INTO accounts (name, balance) VALUES ($1, $2) RETURNING *',
             [name, balance || 0]
         );
-        // Wir senden das frisch erstellte Konto mit Status 201 (Created) zurück
         res.status(201).json(result.rows[0]);
     } catch (err) {
         console.error('Error creating account:', err);
