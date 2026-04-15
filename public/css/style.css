@@ -1,23 +1,19 @@
-/* --- 1. CSS VARIABLEN (Farbschema) --- */
 :root {
-    --primary-color: #0A2540;     /* Ein seriöses, tiefes Banking-Blau */
+    --primary-color: #0A2540;
     --primary-hover: #113a63;
-    --bg-color: #F3F5F9;          /* Ein sehr helles Grau/Blau für den Hintergrund */
+    --bg-color: #F3F5F9;
     --card-bg: #FFFFFF;
     --text-main: #333333;
     --text-muted: #6B7280;
     --border-color: #E5E7EB;
 
-    /* Finanz-Farben */
-    --income-color: #10B981;      /* Modernes Grün */
-    --expense-color: #EF4444;     /* Modernes Rot */
+    --income-color: #10B981;
+    --expense-color: #EF4444;
 
-    /* Layout */
     --border-radius: 12px;
     --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-/* --- 2. RESET & BASIS --- */
 * {
     margin: 0;
     padding: 0;
@@ -45,7 +41,6 @@ h1 {
     letter-spacing: -0.5px;
 }
 
-/* --- 3. LAYOUT & CARDS --- */
 .container {
     max-width: 800px;
     margin: 0 auto;
@@ -66,11 +61,10 @@ hr {
     margin: 1.5rem 0;
 }
 
-/* --- 4. FORMULARE --- */
 form {
     display: flex;
     flex-direction: column;
-    gap: 1rem; /* Abstand zwischen den Eingabefeldern */
+    gap: 1rem;
 }
 
 input, select {
@@ -86,7 +80,7 @@ input, select {
 input:focus, select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(10, 37, 64, 0.1); /* Eleganter Fokus-Ring */
+    box-shadow: 0 0 0 3px rgba(10, 37, 64, 0.1);
     background-color: #FFF;
 }
 
@@ -107,7 +101,6 @@ button:hover {
     background-color: var(--primary-hover);
 }
 
-/* --- 5. LISTEN & EINTRÄGE --- */
 ul {
     list-style: none;
 }
@@ -124,7 +117,6 @@ li:last-child {
     border-bottom: none;
 }
 
-/* --- 6. HILFSKLASSEN FÜR JAVASCRIPT --- */
 .amount-income {
     color: var(--income-color);
     font-weight: 600;
@@ -138,4 +130,86 @@ li:last-child {
 .transaction-date {
     font-size: 0.85rem;
     color: var(--text-muted);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.btn-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    margin-top: 0;
+}
+
+.interactive-list li {
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    padding: 1rem;
+    border-radius: 8px;
+    border-bottom: none;
+    border: 1px solid transparent;
+}
+
+.interactive-list li:hover {
+    background-color: #F9FAFB;
+    border-color: var(--border-color);
+    transform: translateX(4px);
+}
+
+.interactive-list li.active {
+    background-color: #E0F2FE;
+    border-color: #BAE6FD;
+}
+
+.modal {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    margin: auto;
+}
+
+.modal::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.btn-close {
+    background: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    padding: 0;
+    margin: 0;
+    width: 30px;
+    height: 30px;
+    line-height: 1;
+}
+
+.btn-close:hover {
+    background: #F3F4F6;
+    color: var(--text-main);
 }

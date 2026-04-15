@@ -10,44 +10,53 @@
 <div class="container">
     <h1>Finance Dashboard</h1>
 
-    <section class="card">
-        <h2>Your Accounts</h2>
-        <ul id="accounts-list"></ul>
+    <div class="dashboard-grid">
+        <section class="card accounts-section">
+            <div class="card-header">
+                <h2>Your Accounts</h2>
+                <button id="btn-open-account-modal" class="btn-small">+ New</button>
+            </div>
+            <ul id="accounts-list" class="interactive-list"></ul>
+        </section>
 
-        <hr>
-        <h3>Create New Account</h3>
-        <form id="add-account-form">
-            <input type="text" id="account-name" placeholder="Account Name" required>
-            <input type="number" id="account-balance" placeholder="Initial Balance" step="0.01" required>
-            <button type="submit">Create Account</button>
-        </form>
-    </section>
-
-    <section class="card">
-        <h2>Add Transaction</h2>
-        <form id="add-transaction-form">
-            <select id="trans-account-id" required>
-                <option value="" disabled selected>Select Account</option>
-            </select>
-            <select id="trans-type" required>
-                <option value="EXPENSE">Expense (-)</option>
-                <option value="INCOME">Income (+)</option>
-            </select>
-            <input type="number" id="trans-amount" placeholder="Amount" step="0.01" required>
-            <input type="text" id="trans-category" placeholder="Category (e.g. Food, Rent)" required>
-            <input type="text" id="trans-description" placeholder="Description">
-            <button type="submit">Save Transaction</button>
-        </form>
-    </section>
-
-    <section class="card">
-        <h2>Transaction History</h2>
-        <div id="transactions-container">
-            <p>Select an account in the dashboard to see details (Coming soon) or see all below:</p>
-            <ul id="global-transactions-list"></ul>
-        </div>
-    </section>
+        <section class="card transactions-section" id="account-details" style="display: none;">
+            <div class="card-header">
+                <h2 id="detail-account-name">Account Details</h2>
+                <button id="btn-open-transaction-modal" class="btn-small">+ Add Transaction</button>
+            </div>
+            <ul id="transaction-list"></ul>
+        </section>
+    </div>
 </div>
+
+<dialog id="modal-account" class="modal">
+    <div class="modal-header">
+        <h3>Create New Account</h3>
+        <button class="btn-close" id="btn-close-account-modal">&times;</button>
+    </div>
+    <form id="add-account-form">
+        <input type="text" id="account-name" placeholder="Account Name" required>
+        <input type="number" id="account-balance" placeholder="Initial Balance" step="0.01" required>
+        <button type="submit">Create Account</button>
+    </form>
+</dialog>
+
+<dialog id="modal-transaction" class="modal">
+    <div class="modal-header">
+        <h3>Add Transaction</h3>
+        <button class="btn-close" id="btn-close-transaction-modal">&times;</button>
+    </div>
+    <form id="add-transaction-form">
+        <select id="trans-type" required>
+            <option value="EXPENSE">Expense (-)</option>
+            <option value="INCOME">Income (+)</option>
+        </select>
+        <input type="number" id="trans-amount" placeholder="Amount" step="0.01" required>
+        <input type="text" id="trans-category" placeholder="Category (e.g. Food, Rent)" required>
+        <input type="text" id="trans-description" placeholder="Description (Optional)">
+        <button type="submit">Save Transaction</button>
+    </form>
+</dialog>
 
 <script src="js/app.js"></script>
 </body>
