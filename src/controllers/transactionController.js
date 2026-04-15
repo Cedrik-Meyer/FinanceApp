@@ -39,3 +39,74 @@ exports.getTransactionsByAccount = async (req, res) => {
         res.status(500).json({ error: 'Error fetching transactions' });
     }
 };
+
+exports.updateTransaction = async (req, res) => {
+    const { id } = req.params;
+    const { type, amount, category, description } = req.body;
+
+    try {
+        await db.query('BEGIN');
+
+        const oldRes = await db.query('SELECT * FROM transactions WHERE id = $1', [id]);
+        const old = oldRes.rows[0];
+
+        if (!old) {
+            await db.query('ROLLBACK');
+            return res.status(404).json({ error: 'Transaction not found' });
+        }
+
+        const undoAdjustment = old.type === 'INCOME' ? -old.amount : old.amount;
+        await db.query(
+            'UPDATE accounts SET balance = balance + $1 WHERE id = $2',
+            [undoAdjustment, old.account_id]
+        );
+
+        const updateQuery = `
+            UPDATE transactions 
+            SET type = $1, amount = $2, category = $3, description = $4 
+            WHERE id = $5 RETURNING *`;
+        const updatedRes = await db.query(updateQuery, [type, amount, category, description, id]);
+
+        const newAdjustment = type === 'INCOME' ? amount : -amount;
+        await db.query(
+            'UPDATE accounts SET balance = balance + $1 WHERE id = $2',
+            [newAdjustment, old.account_id]
+        );
+
+        await db.query('COMMIT');
+        res.json(updatedRes.rows[0]);
+    } catch (err) {
+        await db.query('ROLLBACK');
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+exports.deleteTransaction = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        await db.query('BEGIN');
+
+        const transRes = await db.query('SELECT * FROM transactions WHERE id = $1', [id]);
+        const transaction = transRes.rows[0];
+
+        if (!transaction) throw new Error('Transaction not found');
+
+        const adjustment = transaction.type === 'INCOME' ? -transaction.amount : transaction.amount;
+
+        await db.query(
+            'UPDATE accounts SET balance = balance + $1 WHERE id = $2',
+            [adjustment, transaction.account_id]
+        );
+
+        await db.query('DELETE FROM transactions WHERE id = $1', [id]);
+
+        await db.query('COMMIT');
+        res.status(200).json({ message: 'Transaction deleted' });
+    } catch (err) {
+        await db.query('ROLLBACK');
+        console.error('Error deleting transaction:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};

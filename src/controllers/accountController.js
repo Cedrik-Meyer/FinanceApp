@@ -23,3 +23,29 @@ exports.createAccount = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+exports.deleteAccount = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('DELETE FROM accounts WHERE id = $1', [id]);
+        res.status(200).json({ message: 'Account deleted' });
+    } catch (err) {
+        console.error('Error deleting account:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+exports.updateAccount = async (req, res) => {
+    const { id } = req.params;
+    const { name, balance } = req.body;
+    try {
+        const result = await db.query(
+            'UPDATE accounts SET name = $1, balance = $2 WHERE id = $3 RETURNING *',
+            [name, balance, id]
+        );
+        res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating account:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};

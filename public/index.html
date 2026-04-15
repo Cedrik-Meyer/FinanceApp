@@ -10,6 +10,11 @@
 <div class="container">
     <h1>Finance Dashboard</h1>
 
+    <div class="summary-card">
+        <h2>Total Balance</h2>
+        <h1 id="total-balance">0,00 €</h1>
+    </div>
+
     <div class="dashboard-grid">
         <section class="card accounts-section">
             <div class="card-header">
@@ -31,31 +36,48 @@
 
 <dialog id="modal-account" class="modal">
     <div class="modal-header">
-        <h3>Create New Account</h3>
+        <h3 id="account-modal-title">Create New Account</h3>
         <button class="btn-close" id="btn-close-account-modal">&times;</button>
     </div>
     <form id="add-account-form">
+        <input type="hidden" id="edit-account-id">
+
         <input type="text" id="account-name" placeholder="Account Name" required>
         <input type="number" id="account-balance" placeholder="Initial Balance" step="0.01" required>
-        <button type="submit">Create Account</button>
+        <button type="submit" id="account-submit-btn">Create Account</button>
     </form>
 </dialog>
 
 <dialog id="modal-transaction" class="modal">
     <div class="modal-header">
-        <h3>Add Transaction</h3>
+        <h3 id="trans-modal-title">Add Transaction</h3>
         <button class="btn-close" id="btn-close-transaction-modal">&times;</button>
     </div>
     <form id="add-transaction-form">
+        <input type="hidden" id="edit-transaction-id">
         <select id="trans-type" required>
             <option value="EXPENSE">Expense (-)</option>
             <option value="INCOME">Income (+)</option>
         </select>
         <input type="number" id="trans-amount" placeholder="Amount" step="0.01" required>
-        <input type="text" id="trans-category" placeholder="Category (e.g. Food, Rent)" required>
+        <input type="text" id="trans-category" placeholder="Category" required>
         <input type="text" id="trans-description" placeholder="Description (Optional)">
-        <button type="submit">Save Transaction</button>
+        <button type="submit" id="trans-submit-btn">Save Transaction</button>
     </form>
+</dialog>
+
+<dialog id="modal-confirm" class="modal">
+    <div class="modal-header">
+        <h3>Please Confirm</h3>
+        <button class="btn-close" id="btn-close-confirm-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+        <p id="confirm-message">Are you sure?</p>
+    </div>
+    <div class="modal-actions">
+        <button id="btn-cancel-confirm" class="btn-secondary">Cancel</button>
+        <button id="btn-ok-confirm" class="btn-danger">Delete</button>
+    </div>
 </dialog>
 
 <script src="js/app.js"></script>
