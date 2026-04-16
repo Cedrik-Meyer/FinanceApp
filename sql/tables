@@ -15,3 +15,13 @@ CREATE TABLE transactions (
                               transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
                               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE depot_positions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    isin VARCHAR(20),
+    ticker_symbol VARCHAR(20) NOT NULL,
+    quantity DECIMAL(10, 4) NOT NULL,
+    buy_price DECIMAL(10, 2) NOT NULL,
+    buy_date DATE NOT NULL DEFAULT CURRENT_DATE
+);

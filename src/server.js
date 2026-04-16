@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const accountRoutes = require('./routes/accounts');
 const transactionRoutes = require('./routes/transactions');
+const depotRoutes = require('./routes/depot');
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/depot', depotRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

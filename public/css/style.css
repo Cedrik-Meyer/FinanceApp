@@ -302,3 +302,84 @@ li:last-child {
     font-size: 3rem;
     margin-bottom: 0;
 }
+
+.topbar {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    box-shadow: var(--box-shadow);
+}
+
+.topbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.topbar h1 {
+    margin: 0;
+    color: white;
+    font-size: 1.5rem;
+    text-align: left;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.nav-btn {
+    background-color: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin: 0;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+}
+
+.nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-btn.active {
+    background-color: white;
+    color: var(--primary-color);
+}
+
+.text-right {
+    text-align: right;
+}
+
+.depot-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.depot-info {
+    flex-grow: 1;
+}
+
+.depot-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.range-btn {
+    background-color: #f4f4f4;
+    color: #333;
+    border: 1px solid #ddd;
+    transition: all 0.2s;
+}
+
+.range-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.range-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}

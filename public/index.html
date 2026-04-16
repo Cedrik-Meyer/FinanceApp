@@ -5,14 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/navigation.js"></script>
+    <script src="js/depot.js"></script>
+    <script src="js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<div class="container">
-    <h1>Finance Dashboard</h1>
+<nav class="topbar">
+    <div class="container topbar-content">
+        <h1>Dashboard</h1>
+        <div class="nav-buttons">
+            <button id="nav-accounts" class="nav-btn active">Accounts</button>
+            <button id="nav-depot" class="nav-btn">Portfolio</button>
+        </div>
+    </div>
+</nav>
 
+<div class="container" id="view-accounts">
     <div class="summary-card">
         <h2>Total Balance</h2>
-        <h1 id="total-balance">0,00 €</h1>
+        <h1 id="total-balance">0.00 €</h1>
     </div>
 
     <div class="dashboard-grid">
@@ -34,6 +46,22 @@
     </div>
 </div>
 
+<div class="container" id="view-depot" style="display: none;">
+    <div class="summary-card">
+        <h2>Portfolio Value</h2>
+        <h1 id="total-depot-value">0.00 €</h1>
+        <p id="total-depot-performance" style="font-size: 1.2rem; margin-top: 0.5rem;"></p>
+    </div>
+
+    <section class="card">
+        <div class="card-header">
+            <h2>Your Positions</h2>
+            <button id="btn-open-depot-modal" class="btn-small">+ Add Position</button>
+        </div>
+        <ul id="depot-list" class="interactive-list"></ul>
+    </section>
+</div>
+
 <dialog id="modal-account" class="modal">
     <div class="modal-header">
         <h3 id="account-modal-title">Create New Account</h3>
@@ -41,7 +69,6 @@
     </div>
     <form id="add-account-form">
         <input type="hidden" id="edit-account-id">
-
         <input type="text" id="account-name" placeholder="Account Name" required>
         <input type="number" id="account-balance" placeholder="Initial Balance" step="0.01" required>
         <button type="submit" id="account-submit-btn">Create Account</button>
@@ -66,6 +93,23 @@
     </form>
 </dialog>
 
+<dialog id="modal-depot" class="modal">
+    <div class="modal-header">
+        <h3 id="depot-modal-title">Add Position</h3>
+        <button class="btn-close" id="btn-close-depot-modal">&times;</button>
+    </div>
+    <form id="add-depot-form">
+        <input type="hidden" id="edit-depot-id">
+        <input type="text" id="depot-name" placeholder="Asset Name" required>
+        <input type="text" id="depot-isin" placeholder="ISIN (Optional)">
+        <input type="text" id="depot-ticker" placeholder="Ticker Symbol (e.g. VWCE.DE)" required>
+        <input type="number" id="depot-quantity" placeholder="Quantity" step="0.0001" required>
+        <input type="number" id="depot-buy-price" placeholder="Buy Price" step="0.01" required>
+        <input type="date" id="depot-buy-date" required>
+        <button type="submit" id="depot-submit-btn">Save Position</button>
+    </form>
+</dialog>
+
 <dialog id="modal-confirm" class="modal">
     <div class="modal-header">
         <h3>Please Confirm</h3>
@@ -80,6 +124,22 @@
     </div>
 </dialog>
 
-<script src="js/app.js"></script>
+<dialog id="modal-chart" class="modal" style="max-width: 800px; width: 95%;">
+    <div class="modal-header">
+        <h3 id="chart-modal-title">Performance History</h3>
+        <button class="btn-close" id="btn-close-chart-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+        <div class="chart-controls" style="margin-bottom: 1rem; display: flex; gap: 0.5rem; justify-content: center;">
+            <button class="btn-small range-btn" data-range="1d">Today</button>
+            <button class="btn-small range-btn" data-range="5d">1W</button>
+            <button class="btn-small range-btn" data-range="1mo">1M</button>
+            <button class="btn-small range-btn active" data-range="1y">1Y</button>
+            <button class="btn-small range-btn" data-range="5y">5Y</button>
+            <button class="btn-small range-btn" data-range="max">MAX</button>
+        </div>
+        <canvas id="stock-chart"></canvas>
+    </div>
+</dialog>
 </body>
 </html>
