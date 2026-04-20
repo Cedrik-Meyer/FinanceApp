@@ -145,62 +145,142 @@ document.addEventListener('DOMContentLoaded', () => {
             let totalValue = 0;
             let totalInvested = 0;
 
+            const groupedPositions = {};
+
             positions.forEach(pos => {
+                if (!groupedPositions[pos.ticker_symbol]) {
+                    groupedPositions[pos.ticker_symbol] = {
+                        ticker_symbol: pos.ticker_symbol,
+                        name: pos.name,
+                        currentPrice: pos.currentPrice,
+                        totalQuantity: 0,
+                        totalInvested: 0,
+                        currentValue: 0,
+                        positions: []
+                    };
+                }
+                groupedPositions[pos.ticker_symbol].totalQuantity += Number(pos.quantity);
+                groupedPositions[pos.ticker_symbol].totalInvested += (Number(pos.buy_price) * Number(pos.quantity));
+                groupedPositions[pos.ticker_symbol].currentValue += Number(pos.currentValue);
+                groupedPositions[pos.ticker_symbol].positions.push(pos);
+
                 totalValue += pos.currentValue;
                 totalInvested += (pos.buy_price * pos.quantity);
+            });
+
+            for (const ticker in groupedPositions) {
+                const group = groupedPositions[ticker];
+                const avgBuyPrice = group.totalInvested / group.totalQuantity;
+                const performanceAbs = group.currentValue - group.totalInvested;
+                const performanceRel = group.totalInvested > 0 ? (performanceAbs / group.totalInvested) * 100 : 0;
+
+                const perfClass = performanceAbs >= 0 ? 'amount-income' : 'amount-expense';
+                const sign = performanceAbs >= 0 ? '+' : '';
 
                 const li = document.createElement('li');
-                li.className = 'depot-item interactive-list-item';
+                li.className = 'depot-item interactive-list-item group-item';
+                li.style.flexDirection = 'column';
+                li.style.alignItems = 'stretch';
 
-                const perfClass = pos.performanceAbs >= 0 ? 'amount-income' : 'amount-expense';
-                const sign = pos.performanceAbs >= 0 ? '+' : '';
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'group-header';
+                headerDiv.style.display = 'flex';
+                headerDiv.style.justifyContent = 'space-between';
+                headerDiv.style.alignItems = 'center';
+                headerDiv.style.width = '100%';
 
-                li.innerHTML = `
-                    <div class="depot-info" style="cursor: pointer;">
-                        <strong>${pos.name}</strong> <span>(${pos.ticker_symbol})</span><br>
-                        <span class="transaction-date">${pos.quantity} Shares @ ${formatEur(pos.currentPrice)} / share</span><br>
-                        <span class="transaction-date">Buy: ${formatEur(pos.buy_price)}</span>
+                headerDiv.innerHTML = `
+                    <div class="depot-info" style="cursor: pointer; flex-grow: 1;">
+                        <strong>${group.name}</strong> <span>(${group.ticker_symbol})</span> 
+                        <span class="toggle-icon" style="font-size: 0.8rem; margin-left: 0.5rem; color: var(--text-muted);">▼</span><br>
+                        <span class="transaction-date">${group.totalQuantity.toFixed(4)} Shares @ ${formatEur(group.currentPrice)} / share</span><br>
+                        <span class="transaction-date">Avg Buy: ${formatEur(avgBuyPrice)}</span>
                     </div>
                     <div class="depot-actions text-right">
-                        <div class="amount-display">${formatEur(pos.currentValue)}</div>
+                        <div class="amount-display">${formatEur(group.currentValue)}</div>
                         <div class="${perfClass} transaction-date" style="margin-bottom: 0.5rem;">
-                            ${sign}${formatEur(pos.performanceAbs)} (${sign}${formatPercent(pos.performanceRel)})
+                            ${sign}${formatEur(performanceAbs)} (${sign}${formatPercent(performanceRel)})
                         </div>
                         <div class="action-buttons">
-                            <button class="btn-icon edit-depot-btn">✏️</button>
-                            <button class="btn-icon delete-depot-btn">🗑️</button>
+                            <button class="btn-icon chart-depot-btn">📈</button>
                         </div>
                     </div>
                 `;
 
-                li.querySelector('.depot-info').addEventListener('click', () => showChart(pos.ticker_symbol, pos.name));
+                const subList = document.createElement('ul');
+                subList.className = 'sub-positions-list';
+                subList.style.display = 'none';
 
-                li.querySelector('.delete-depot-btn').addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const isConfirmed = await customConfirm(`Delete position "${pos.name}"?`);
-                    if(isConfirmed) {
-                        await fetch(`/api/depot/${pos.id}`, { method: 'DELETE' });
-                        loadDepot();
-                    }
+                group.positions.forEach(pos => {
+                    const posPerfAbs = pos.currentValue - (pos.buy_price * pos.quantity);
+                    const posPerfRel = (pos.buy_price * pos.quantity) > 0 ? (posPerfAbs / (pos.buy_price * pos.quantity)) * 100 : 0;
+                    const pPerfClass = posPerfAbs >= 0 ? 'amount-income' : 'amount-expense';
+                    const pSign = posPerfAbs >= 0 ? '+' : '';
+
+                    const subLi = document.createElement('li');
+                    subLi.className = 'depot-item sub-item';
+                    subLi.innerHTML = `
+                        <div class="depot-info">
+                            <span class="transaction-date">${Number(pos.quantity).toFixed(4)} Shares</span><br>
+                            <span class="transaction-date">Buy: ${formatEur(pos.buy_price)} (${new Date(pos.buy_date).toLocaleDateString('en-US')})</span>
+                        </div>
+                        <div class="depot-actions text-right">
+                            <div class="amount-display" style="font-size: 1rem;">${formatEur(pos.currentValue)}</div>
+                            <div class="${pPerfClass} transaction-date" style="margin-bottom: 0.5rem;">
+                                ${pSign}${formatEur(posPerfAbs)} (${pSign}${formatPercent(posPerfRel)})
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn-icon edit-depot-btn">✏️</button>
+                                <button class="btn-icon delete-depot-btn">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+
+                    subLi.querySelector('.delete-depot-btn').addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const isConfirmed = await customConfirm(`Delete position "${pos.name}"?`);
+                        if(isConfirmed) {
+                            await fetch(`/api/depot/${pos.id}`, { method: 'DELETE' });
+                            loadDepot();
+                        }
+                    });
+
+                    subLi.querySelector('.edit-depot-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.getElementById('edit-depot-id').value = pos.id;
+                        document.getElementById('depot-name').value = pos.name;
+                        document.getElementById('depot-isin').value = pos.isin || '';
+                        document.getElementById('depot-ticker').value = pos.ticker_symbol;
+                        document.getElementById('depot-quantity').value = pos.quantity;
+                        document.getElementById('depot-buy-price').value = pos.buy_price;
+                        document.getElementById('depot-buy-date').value = pos.buy_date.split('T')[0];
+
+                        document.getElementById('depot-account').style.display = 'none';
+                        document.getElementById('depot-account').required = false;
+
+                        document.getElementById('depot-modal-title').textContent = 'Edit Position';
+                        document.getElementById('depot-submit-btn').textContent = 'Update Position';
+                        modalDepot.showModal();
+                    });
+
+                    subList.appendChild(subLi);
                 });
 
-                li.querySelector('.edit-depot-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    document.getElementById('edit-depot-id').value = pos.id;
-                    document.getElementById('depot-name').value = pos.name;
-                    document.getElementById('depot-isin').value = pos.isin || '';
-                    document.getElementById('depot-ticker').value = pos.ticker_symbol;
-                    document.getElementById('depot-quantity').value = pos.quantity;
-                    document.getElementById('depot-buy-price').value = pos.buy_price;
-                    document.getElementById('depot-buy-date').value = pos.buy_date.split('T')[0];
-
-                    document.getElementById('depot-modal-title').textContent = 'Edit Position';
-                    document.getElementById('depot-submit-btn').textContent = 'Update Position';
-                    modalDepot.showModal();
+                headerDiv.querySelector('.depot-info').addEventListener('click', () => {
+                    const isHidden = subList.style.display === 'none';
+                    subList.style.display = isHidden ? 'block' : 'none';
+                    headerDiv.querySelector('.toggle-icon').textContent = isHidden ? '▲' : '▼';
                 });
 
+                headerDiv.querySelector('.chart-depot-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showChart(group.ticker_symbol, group.name);
+                });
+
+                li.appendChild(headerDiv);
+                li.appendChild(subList);
                 depotList.appendChild(li);
-            });
+            }
 
             totalDepotValue.textContent = formatEur(totalValue);
             const overallPerfAbs = totalValue - totalInvested;
