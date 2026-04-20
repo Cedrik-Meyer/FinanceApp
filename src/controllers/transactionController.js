@@ -1,15 +1,22 @@
 const db = require('../db');
 
 exports.createTransaction = async (req, res) => {
-    const { account_id, type, amount, category, description } = req.body;
+    const { account_id, type, amount, category, description, transaction_date } = req.body;
 
     try {
         await db.query('BEGIN');
 
         const insertQuery = `
-            INSERT INTO transactions (account_id, type, amount, category, description)
-            VALUES ($1, $2, $3, $4, $5) RETURNING *`;
-        const resTransaction = await db.query(insertQuery, [account_id, type, amount, category, description]);
+            INSERT INTO transactions (account_id, type, amount, category, description, transaction_date)
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+        const resTransaction = await db.query(insertQuery, [
+            account_id,
+            type,
+            amount,
+            category,
+            description,
+            transaction_date || new Date()
+        ]);
 
         const adjustment = type === 'INCOME' ? amount : -amount;
         await db.query(
@@ -22,7 +29,6 @@ exports.createTransaction = async (req, res) => {
         res.status(201).json(resTransaction.rows[0]);
     } catch (err) {
         await db.query('ROLLBACK');
-        console.error('Transaction Error:', err);
         res.status(500).json({ error: 'Failed to process transaction' });
     }
 };
@@ -42,7 +48,7 @@ exports.getTransactionsByAccount = async (req, res) => {
 
 exports.updateTransaction = async (req, res) => {
     const { id } = req.params;
-    const { type, amount, category, description } = req.body;
+    const { type, amount, category, description, transaction_date } = req.body;
 
     try {
         await db.query('BEGIN');
@@ -62,10 +68,17 @@ exports.updateTransaction = async (req, res) => {
         );
 
         const updateQuery = `
-            UPDATE transactions 
-            SET type = $1, amount = $2, category = $3, description = $4 
-            WHERE id = $5 RETURNING *`;
-        const updatedRes = await db.query(updateQuery, [type, amount, category, description, id]);
+            UPDATE transactions
+            SET type = $1, amount = $2, category = $3, description = $4, transaction_date = $5
+            WHERE id = $6 RETURNING *`;
+        const updatedRes = await db.query(updateQuery, [
+            type,
+            amount,
+            category,
+            description,
+            transaction_date,
+            id
+        ]);
 
         const newAdjustment = type === 'INCOME' ? amount : -amount;
         await db.query(
@@ -77,7 +90,6 @@ exports.updateTransaction = async (req, res) => {
         res.json(updatedRes.rows[0]);
     } catch (err) {
         await db.query('ROLLBACK');
-        console.error(err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };

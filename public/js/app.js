@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('trans-amount').value = t.amount;
                     document.getElementById('trans-category').value = t.category;
                     document.getElementById('trans-description').value = t.description || '';
+                    document.getElementById('trans-date').value = t.transaction_date.split('T')[0];
 
                     document.getElementById('trans-modal-title').textContent = 'Edit Transaction';
                     document.getElementById('trans-submit-btn').textContent = 'Update Transaction';
@@ -234,7 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
             type: document.getElementById('trans-type').value,
             amount: document.getElementById('trans-amount').value,
             category: document.getElementById('trans-category').value,
-            description: document.getElementById('trans-description').value
+            description: document.getElementById('trans-description').value,
+            transaction_date: document.getElementById('trans-date').value
         };
 
         if (!id) {
@@ -262,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-open-transaction-modal').addEventListener('click', () => {
         addTransactionForm.reset();
         document.getElementById('edit-transaction-id').value = '';
+        document.getElementById('trans-date').value = new Date().toISOString().split('T')[0];
         document.getElementById('trans-modal-title').textContent = 'Add Transaction';
         document.getElementById('trans-submit-btn').textContent = 'Save Transaction';
         modalTransaction.showModal();
