@@ -101,11 +101,13 @@
     </div>
     <form id="add-depot-form">
         <input type="hidden" id="edit-depot-id">
+        <select id="depot-account" required></select>
         <input type="text" id="depot-name" placeholder="Asset Name" required>
         <input type="text" id="depot-isin" placeholder="ISIN (Optional)">
         <input type="text" id="depot-ticker" placeholder="Ticker Symbol (e.g. VWCE.DE)" required>
         <input type="number" id="depot-quantity" placeholder="Quantity" step="0.0001" required>
         <input type="number" id="depot-buy-price" placeholder="Buy Price" step="0.01" required>
+        <input type="number" id="depot-fee" placeholder="Order Fee" step="0.01">
         <input type="date" id="depot-buy-date" required>
         <button type="submit" id="depot-submit-btn">Save Position</button>
     </form>

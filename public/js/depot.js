@@ -13,11 +13,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalChart = document.getElementById('modal-chart');
     let stockChartInstance = null;
 
-    document.getElementById('btn-open-depot-modal').addEventListener('click', () => {
+    document.getElementById('btn-open-depot-modal').addEventListener('click', async () => {
         addDepotForm.reset();
         document.getElementById('edit-depot-id').value = '';
         document.getElementById('depot-modal-title').textContent = 'Add Position';
         document.getElementById('depot-submit-btn').textContent = 'Save Position';
+
+        const accountSelect = document.getElementById('depot-account');
+        accountSelect.innerHTML = '<option value="" disabled selected>Select Account</option>';
+        accountSelect.style.display = 'block';
+        accountSelect.required = true;
+
+        try {
+            const response = await fetch('/api/accounts');
+            const accounts = await response.json();
+            accounts.forEach(acc => {
+                const option = document.createElement('option');
+                option.value = acc.id;
+                option.textContent = `${acc.name} (${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(acc.balance)})`;
+                accountSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error(error);
+        }
+
         modalDepot.showModal();
     });
 
@@ -254,9 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('depot-quantity').value = pos.quantity;
                         document.getElementById('depot-buy-price').value = pos.buy_price;
                         document.getElementById('depot-buy-date').value = pos.buy_date.split('T')[0];
+                        document.getElementById('depot-fee').value = pos.fee || '';
 
-                        document.getElementById('depot-account').style.display = 'none';
-                        document.getElementById('depot-account').required = false;
+                        const accountSelect = document.getElementById('depot-account');
+                        accountSelect.style.display = 'none';
+                        accountSelect.required = false;
 
                         document.getElementById('depot-modal-title').textContent = 'Edit Position';
                         document.getElementById('depot-submit-btn').textContent = 'Update Position';
@@ -305,7 +326,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ticker_symbol: document.getElementById('depot-ticker').value,
             quantity: document.getElementById('depot-quantity').value,
             buy_price: document.getElementById('depot-buy-price').value,
-            buy_date: document.getElementById('depot-buy-date').value
+            buy_date: document.getElementById('depot-buy-date').value,
+            account_id: document.getElementById('depot-account').value,
+            fee: document.getElementById('depot-fee').value
         };
 
         const method = id ? 'PUT' : 'POST';
@@ -323,4 +346,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     loadDepot();
+    window.addEventListener('reloadDepot', loadDepot);
 });

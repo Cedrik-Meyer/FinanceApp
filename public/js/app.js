@@ -271,4 +271,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     loadAccounts();
+    window.addEventListener('reloadAccounts', loadAccounts);
 });

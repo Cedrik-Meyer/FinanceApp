@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnDepot.classList.remove('active');
         viewAccounts.style.display = 'block';
         viewDepot.style.display = 'none';
+        window.dispatchEvent(new CustomEvent('reloadAccounts'));
     });
 
     btnDepot.addEventListener('click', () => {
@@ -16,5 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnAccounts.classList.remove('active');
         viewDepot.style.display = 'block';
         viewAccounts.style.display = 'none';
+        window.dispatchEvent(new CustomEvent('reloadDepot'));
     });
 });
