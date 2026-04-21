@@ -36,10 +36,14 @@ exports.createTransaction = async (req, res) => {
 exports.getTransactionsByAccount = async (req, res) => {
     const { accountId } = req.params;
     try {
-        const result = await db.query(
-            'SELECT * FROM transactions WHERE account_id = $1 ORDER BY transaction_date DESC',
-            [accountId]
-        );
+        const query = `
+            SELECT t.*, 
+                   EXISTS(SELECT 1 FROM depot_positions dp WHERE t.id = dp.transaction_id OR t.id = dp.fee_transaction_id) as is_depot_linked
+            FROM transactions t
+            WHERE t.account_id = $1 
+            ORDER BY t.transaction_date DESC
+        `;
+        const result = await db.query(query, [accountId]);
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: 'Error fetching transactions' });
@@ -52,6 +56,12 @@ exports.updateTransaction = async (req, res) => {
 
     try {
         await db.query('BEGIN');
+
+        const checkRes = await db.query('SELECT 1 FROM depot_positions WHERE transaction_id = $1 OR fee_transaction_id = $1', [id]);
+        if (checkRes.rows.length > 0) {
+            await db.query('ROLLBACK');
+            return res.status(403).json({ error: 'Cannot modify a transaction linked to a portfolio position.' });
+        }
 
         const oldRes = await db.query('SELECT * FROM transactions WHERE id = $1', [id]);
         const old = oldRes.rows[0];
@@ -100,6 +110,12 @@ exports.deleteTransaction = async (req, res) => {
     try {
         await db.query('BEGIN');
 
+        const checkRes = await db.query('SELECT 1 FROM depot_positions WHERE transaction_id = $1 OR fee_transaction_id = $1', [id]);
+        if (checkRes.rows.length > 0) {
+            await db.query('ROLLBACK');
+            return res.status(403).json({ error: 'Cannot delete a transaction linked to a portfolio position.' });
+        }
+
         const transRes = await db.query('SELECT * FROM transactions WHERE id = $1', [id]);
         const transaction = transRes.rows[0];
 
@@ -118,7 +134,6 @@ exports.deleteTransaction = async (req, res) => {
         res.status(200).json({ message: 'Transaction deleted' });
     } catch (err) {
         await db.query('ROLLBACK');
-        console.error('Error deleting transaction:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };

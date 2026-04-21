@@ -120,9 +120,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isIncome = t.type === 'INCOME';
                 const sign = isIncome ? '+' : '-';
                 const colorClass = isIncome ? 'amount-income' : 'amount-expense';
-                const date = new Date(t.transaction_date).toLocaleDateString('de-DE');
+                const date = new Date(t.transaction_date).toLocaleDateString('en-US');
 
-                // In der forEach-Schleife von loadTransactions:
+                let actionHTML = '';
+                if (!t.is_depot_linked) {
+                    actionHTML = `
+                        <button class="btn-icon edit-trans-btn">✏️</button>
+                        <button class="btn-icon delete-trans-btn">🗑️</button>
+                    `;
+                } else {
+                    actionHTML = `<span style="font-size: 0.9rem; color: var(--text-muted); cursor: help;" title="Managed in Portfolio">🔒 Portfolio</span>`;
+                }
+
                 li.innerHTML = `
                     <div class="transaction-info">
                         <strong>${t.category}</strong> <br>
@@ -130,38 +139,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="transaction-actions">
                         <span class="${colorClass} amount-display">${sign} ${formatEur(t.amount)}</span>
-                        <button class="btn-icon edit-trans-btn">✏️</button>
-                        <button class="btn-icon delete-trans-btn">🗑️</button>
+                        ${actionHTML}
                     </div>
                 `;
 
-                li.querySelector('.edit-trans-btn').addEventListener('click', () => {
-                    document.getElementById('edit-transaction-id').value = t.id;
-                    document.getElementById('trans-type').value = t.type;
-                    document.getElementById('trans-amount').value = t.amount;
-                    document.getElementById('trans-category').value = t.category;
-                    document.getElementById('trans-description').value = t.description || '';
-                    document.getElementById('trans-date').value = t.transaction_date.split('T')[0];
+                if (!t.is_depot_linked) {
+                    li.querySelector('.edit-trans-btn').addEventListener('click', () => {
+                        document.getElementById('edit-transaction-id').value = t.id;
+                        document.getElementById('trans-type').value = t.type;
+                        document.getElementById('trans-amount').value = t.amount;
+                        document.getElementById('trans-category').value = t.category;
+                        document.getElementById('trans-description').value = t.description || '';
+                        document.getElementById('trans-date').value = t.transaction_date.split('T')[0];
 
-                    document.getElementById('trans-modal-title').textContent = 'Edit Transaction';
-                    document.getElementById('trans-submit-btn').textContent = 'Update Transaction';
-                    modalTransaction.showModal();
-                });
+                        document.getElementById('trans-modal-title').textContent = 'Edit Transaction';
+                        document.getElementById('trans-submit-btn').textContent = 'Update Transaction';
+                        modalTransaction.showModal();
+                    });
 
-                li.querySelector('.delete-trans-btn').addEventListener('click', async () => {
-                    const isConfirmed = await customConfirm('Are you sure you want to delete this transaction?');
-                    if(isConfirmed) {
-                        try {
-                            const response = await fetch(`/api/transactions/${t.id}`, { method: 'DELETE' });
-                            if (response.ok) {
-                                loadAccounts();
-                                loadTransactions(accountId);
+                    li.querySelector('.delete-trans-btn').addEventListener('click', async () => {
+                        const isConfirmed = await customConfirm('Are you sure you want to delete this transaction?');
+                        if(isConfirmed) {
+                            try {
+                                const response = await fetch(`/api/transactions/${t.id}`, { method: 'DELETE' });
+                                if (response.ok) {
+                                    loadAccounts();
+                                    loadTransactions(accountId);
+                                }
+                            } catch (error) {
+                                console.error(error);
                             }
-                        } catch (error) {
-                            console.error(error);
                         }
-                    }
-                });
+                    });
+                }
 
                 transactionList.appendChild(li);
             });

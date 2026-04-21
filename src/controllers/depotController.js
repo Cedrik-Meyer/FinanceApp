@@ -8,7 +8,6 @@ const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHis
 
 exports.getPositions = async (req, res) => {
     try {
-        // Join mit der transactions-Tabelle, um den Betrag der Gebühr zu erhalten
         const result = await db.query(`
             SELECT dp.*, t_fee.amount as fee_amount 
             FROM depot_positions dp
@@ -116,7 +115,7 @@ exports.updatePosition = async (req, res) => {
             if (feeTransRes.rows[0]) oldFeeAmount = parseFloat(feeTransRes.rows[0].amount);
         }
 
-        const balanceAdjustment = (oldMainTrans.amount + oldFeeAmount) - (newPurchaseAmount + newFeeAmount);
+        const balanceAdjustment = (parseFloat(oldMainTrans.amount) + oldFeeAmount) - (newPurchaseAmount + newFeeAmount);
         await db.query('UPDATE accounts SET balance = balance + $1 WHERE id = $2', [balanceAdjustment, accountId]);
 
         await db.query(
