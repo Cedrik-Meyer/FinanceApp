@@ -23,5 +23,7 @@ CREATE TABLE depot_positions (
     ticker_symbol VARCHAR(20) NOT NULL,
     quantity DECIMAL(10, 4) NOT NULL,
     buy_price DECIMAL(10, 2) NOT NULL,
-    buy_date DATE NOT NULL DEFAULT CURRENT_DATE
+    buy_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    transaction_id INTEGER REFERENCES transactions(id) ON DELETE SET NULL,
+    fee_transaction_id INTEGER REFERENCES transactions(id) ON DELETE SET NULL
 );
