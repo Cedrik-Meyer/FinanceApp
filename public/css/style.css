@@ -401,3 +401,43 @@ li:last-child {
 .sub-item:last-child {
     border-bottom: none !important;
 }
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--text-muted);
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    color: white;
+    font-weight: 600;
+    z-index: 9999;
+    box-shadow: var(--box-shadow);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification.hidden {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+.notification.success {
+    background-color: var(--income-color);
+}
+
+.notification.error {
+    background-color: var(--expense-color);
+}

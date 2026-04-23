@@ -1,4 +1,5 @@
 const db = require('../db');
+const { parse } = require('csv-parse/sync');
 
 exports.createTransaction = async (req, res) => {
     const { account_id, type, amount, category, description, transaction_date } = req.body;
@@ -135,5 +136,85 @@ exports.deleteTransaction = async (req, res) => {
     } catch (err) {
         await db.query('ROLLBACK');
         res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+exports.importTransactions = async (req, res) => {
+    const { accountId } = req.params;
+    const file = req.file;
+
+    if (!file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    try {
+        const fileContent = file.buffer.toString('latin1');
+
+        const records = parse(fileContent, {
+            delimiter: ';',
+            columns: true,
+            skip_empty_lines: true,
+            bom: true
+        });
+
+        let importedCount = 0;
+        let skippedCount = 0;
+
+        await db.query('BEGIN');
+
+        for (const row of records) {
+            const rawAmount = row['Betrag'];
+            if (!rawAmount) continue;
+
+            const amountStr = rawAmount.replace(/\./g, '').replace(',', '.');
+            let amount = parseFloat(amountStr);
+
+            if (isNaN(amount) || amount === 0) continue;
+
+            const type = amount > 0 ? 'INCOME' : 'EXPENSE';
+            amount = Math.abs(amount);
+
+            const rawDate = row['Buchungstag'];
+            let transaction_date = new Date();
+            if (rawDate) {
+                const parts = rawDate.split('.');
+                if (parts.length === 3) {
+                    const year = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
+                    transaction_date = `${year}-${parts[1]}-${parts[0]}`;
+                }
+            }
+
+            const category = row['Buchungstext'] || 'Import';
+            const description = `${row['Beguenstigter/Zahlungspflichtiger'] || ''} ${row['Verwendungszweck'] || ''}`.trim();
+
+            const checkQuery = `
+                SELECT 1 FROM transactions
+                WHERE account_id = $1 AND type = $2 AND amount = $3 AND transaction_date = $4 AND description = $5
+            `;
+            const checkRes = await db.query(checkQuery, [accountId, type, amount, transaction_date, description]);
+
+            if (checkRes.rows.length === 0) {
+                const insertQuery = `
+                    INSERT INTO transactions (account_id, type, amount, category, description, transaction_date)
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                `;
+                await db.query(insertQuery, [accountId, type, amount, category, description, transaction_date]);
+
+                const adjustment = type === 'INCOME' ? amount : -amount;
+                await db.query(
+                    'UPDATE accounts SET balance = balance + $1 WHERE id = $2',
+                    [adjustment, accountId]
+                );
+                importedCount++;
+            } else {
+                skippedCount++;
+            }
+        }
+
+        await db.query('COMMIT');
+        res.json({ imported: importedCount, skipped: skippedCount });
+    } catch (err) {
+        await db.query('ROLLBACK');
+        res.status(500).json({ error: 'Import failed' });
     }
 };

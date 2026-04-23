@@ -14,11 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancelConfirm = document.getElementById('btn-cancel-confirm');
     const btnOkConfirm = document.getElementById('btn-ok-confirm');
     const btnCloseConfirm = document.getElementById('btn-close-confirm-modal');
+    const modalImport = document.getElementById('modal-import');
+    const importForm = document.getElementById('import-form');
 
     document.getElementById('btn-open-account-modal').addEventListener('click', () => modalAccount.showModal());
     document.getElementById('btn-open-transaction-modal').addEventListener('click', () => modalTransaction.showModal());
     document.getElementById('btn-close-account-modal').addEventListener('click', () => modalAccount.close());
     document.getElementById('btn-close-transaction-modal').addEventListener('click', () => modalTransaction.close());
+    document.getElementById('btn-open-import-modal').addEventListener('click', () => modalImport.showModal());
+    document.getElementById('btn-close-import-modal').addEventListener('click', () => modalImport.close());
 
 
     const formatEur = (amount) => {
@@ -27,6 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
             currency: 'EUR'
         }).format(amount);
     };
+
+    function showNotification(message, type = 'success') {
+        const notification = document.getElementById('app-notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+
+        setTimeout(() => {
+            notification.classList.add('hidden');
+        }, 5000);
+    }
 
     async function loadAccounts() {
         try {
@@ -278,6 +292,47 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('trans-modal-title').textContent = 'Add Transaction';
         document.getElementById('trans-submit-btn').textContent = 'Save Transaction';
         modalTransaction.showModal();
+    });
+
+    importForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!currentAccountId) return;
+
+        const fileInput = document.getElementById('import-file');
+        const file = fileInput.files[0];
+        const submitBtn = document.getElementById('import-submit-btn');
+
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Importing...';
+
+        try {
+            const response = await fetch(`/api/transactions/import/${currentAccountId}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showNotification(`Import completed! Imported: ${result.imported} | Skipped: ${result.skipped}`, 'success');
+                modalImport.close();
+                importForm.reset();
+                loadAccounts();
+                loadTransactions(currentAccountId);
+            } else {
+                showNotification('Import failed. Please check the file format.', 'error');
+            }
+        } catch (error) {
+            showNotification('An unexpected error occurred during import.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Upload & Import';
+        }
     });
 
     loadAccounts();

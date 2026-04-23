@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+<div id="app-notification" class="notification hidden"></div>
+
 <nav class="topbar">
     <div class="container topbar-content">
         <h1>Dashboard</h1>
@@ -39,7 +41,10 @@
         <section class="card transactions-section" id="account-details" style="display: none;">
             <div class="card-header">
                 <h2 id="detail-account-name">Account Details</h2>
-                <button id="btn-open-transaction-modal" class="btn-small">+ Add Transaction</button>
+                <div class="header-actions">
+                    <button id="btn-open-import-modal" class="btn-small btn-secondary">Import CSV</button>
+                    <button id="btn-open-transaction-modal" class="btn-small">+ Add Transaction</button>
+                </div>
             </div>
             <ul id="transaction-list"></ul>
         </section>
@@ -143,6 +148,18 @@
         </div>
         <canvas id="stock-chart"></canvas>
     </div>
+</dialog>
+
+<dialog id="modal-import" class="modal">
+    <div class="modal-header">
+        <h3>Import Transactions</h3>
+        <button class="btn-close" id="btn-close-import-modal">&times;</button>
+    </div>
+    <form id="import-form">
+        <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted);">Please upload an "Excel (CSV-CAMT V8)" export from Sparkasse.</p>
+        <input type="file" id="import-file" accept=".csv" required>
+        <button type="submit" id="import-submit-btn">Upload & Import</button>
+    </form>
 </dialog>
 </body>
 </html>
