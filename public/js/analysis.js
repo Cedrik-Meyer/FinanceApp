@@ -3,20 +3,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const endInput = document.getElementById('analysis-end');
     const btnRun = document.getElementById('btn-run-analysis');
     const analysisList = document.getElementById('analysis-list');
+    const accountSelect = document.getElementById('analysis-account');
     let analysisChart = null;
 
     const currentYear = new Date().getFullYear();
     startInput.value = `${currentYear}-01-01`;
     endInput.value = `${currentYear}-12-31`;
 
+    async function loadAnalysisAccounts() {
+        try {
+            const response = await fetch('/api/accounts');
+            const accounts = await response.json();
+
+            accountSelect.innerHTML = '<option value="all">All Accounts</option>';
+
+            accounts.forEach(acc => {
+                const option = document.createElement('option');
+                option.value = acc.id;
+                option.textContent = acc.name;
+                accountSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading accounts for analysis:', error);
+        }
+    }
+
     async function runAnalysis() {
         const start = startInput.value;
         const end = endInput.value;
+        const accountId = accountSelect.value;
 
         if (!start || !end) return;
 
         try {
-            const response = await fetch(`/api/transactions/stats/analysis/${start}/${end}`);
+            const response = await fetch(`/api/transactions/stats/analysis/${start}/${end}?accountId=${accountId}`);
             const data = await response.json();
 
             renderList(data);
@@ -122,4 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     btnRun.addEventListener('click', runAnalysis);
+    loadAnalysisAccounts();
+    window.addEventListener('reloadAccounts', loadAnalysisAccounts);
 });

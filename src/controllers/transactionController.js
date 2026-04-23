@@ -221,8 +221,10 @@ exports.importTransactions = async (req, res) => {
 
 exports.getExpenseAnalysis = async (req, res) => {
     const { startDate, endDate } = req.params;
+    const { accountId } = req.query;
+
     try {
-        const query = `
+        let query = `
             SELECT TRIM(category) as category,
                    SUM(amount) as total,
                    json_agg(json_build_object('description', description, 'amount', amount, 'date', transaction_date)) as details
@@ -230,12 +232,21 @@ exports.getExpenseAnalysis = async (req, res) => {
             WHERE type = 'EXPENSE'
               AND transaction_date >= $1
               AND transaction_date <= $2
-            GROUP BY TRIM(category)
-            ORDER BY total DESC
         `;
-        const result = await db.query(query, [startDate, endDate]);
+
+        const params = [startDate, endDate];
+
+        if (accountId && accountId !== 'all') {
+            query += ` AND account_id = $3`;
+            params.push(accountId);
+        }
+
+        query += ` GROUP BY TRIM(category) ORDER BY total DESC`;
+
+        const result = await db.query(query, params);
         res.json(result.rows);
     } catch (err) {
+        console.error("Analysis DB Error:", err);
         res.status(500).json({ error: 'Error fetching analysis data' });
     }
 };
