@@ -218,3 +218,24 @@ exports.importTransactions = async (req, res) => {
         res.status(500).json({ error: 'Import failed' });
     }
 };
+
+exports.getExpenseAnalysis = async (req, res) => {
+    const { startDate, endDate } = req.params;
+    try {
+        const query = `
+            SELECT TRIM(category) as category,
+                   SUM(amount) as total,
+                   json_agg(json_build_object('description', description, 'amount', amount, 'date', transaction_date)) as details
+            FROM transactions
+            WHERE type = 'EXPENSE'
+              AND transaction_date >= $1
+              AND transaction_date <= $2
+            GROUP BY TRIM(category)
+            ORDER BY total DESC
+        `;
+        const result = await db.query(query, [startDate, endDate]);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: 'Error fetching analysis data' });
+    }
+};
