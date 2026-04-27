@@ -468,3 +468,36 @@ button:disabled {
     height: 300px;
     width: 100%;
 }
+
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.auth-switch {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.auth-switch a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-logout {
+    background-color: var(--expense-color);
+    margin-left: 1rem;
+}
+
+.btn-logout:hover {
+    background-color: #DC2626;
+}

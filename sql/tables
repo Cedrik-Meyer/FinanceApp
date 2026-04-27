@@ -6,14 +6,14 @@ CREATE TABLE accounts (
 );
 
 CREATE TABLE transactions (
-                              id SERIAL PRIMARY KEY,
-                              account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-                              type VARCHAR(10) NOT NULL CHECK (type IN ('INCOME', 'EXPENSE')),
-                              amount DECIMAL(10, 2) NOT NULL,
-                              category VARCHAR(50) NOT NULL,
-                              description TEXT,
-                              transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
-                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    type VARCHAR(10) NOT NULL CHECK (type IN ('INCOME', 'EXPENSE')),
+    amount DECIMAL(10, 2) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    description TEXT,
+    transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE depot_positions (
@@ -26,4 +26,11 @@ CREATE TABLE depot_positions (
     buy_date DATE NOT NULL DEFAULT CURRENT_DATE,
     transaction_id INTEGER REFERENCES transactions(id) ON DELETE SET NULL,
     fee_transaction_id INTEGER REFERENCES transactions(id) ON DELETE SET NULL
+);
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
