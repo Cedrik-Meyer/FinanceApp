@@ -24,7 +24,7 @@ function showMainApp() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const authForm = document.getElementById('auth-form');
-    const authSwitchLink = document.getElementById('auth-switch-link');
+    const authSwitchText = document.getElementById('auth-switch-text');
     const authTitle = document.getElementById('auth-title');
     const authSubmitBtn = document.getElementById('auth-submit-btn');
     const btnLogout = document.getElementById('btn-logout');
@@ -42,16 +42,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         showAuthView();
     }
 
-    authSwitchLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        isLoginMode = !isLoginMode;
-        authTitle.textContent = isLoginMode ? 'Login' : 'Register';
-        authSubmitBtn.textContent = isLoginMode ? 'Login' : 'Register';
-        document.getElementById('auth-switch-text').innerHTML = isLoginMode
-            ? 'New here? <a href="#" id="auth-switch-link">Register</a>'
-            : 'Already have an account? <a href="#" id="auth-switch-link">Login</a>';
+    authSwitchText.addEventListener('click', (e) => {
+        if (e.target.id === 'auth-switch-link') {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
 
-        document.getElementById('auth-switch-link').addEventListener('click', arguments.callee);
+            authForm.reset();
+
+            authTitle.textContent = isLoginMode ? 'Login' : 'Register';
+            authSubmitBtn.textContent = isLoginMode ? 'Login' : 'Register';
+
+            authSwitchText.innerHTML = isLoginMode
+                ? 'New here? <a href="#" id="auth-switch-link">Register</a>'
+                : 'Already have an account? <a href="#" id="auth-switch-link">Login</a>';
+        }
     });
 
     authForm.addEventListener('submit', async (e) => {
@@ -71,8 +75,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 authForm.reset();
                 showMainApp();
             } else {
-                authSwitchLink.click();
-                document.getElementById('auth-username').value = username;
+                isLoginMode = true;
+                authForm.reset();
+                authTitle.textContent = 'Login';
+                authSubmitBtn.textContent = 'Login';
+                authSwitchText.innerHTML = 'New here? <a href="#" id="auth-switch-link">Register</a>';
             }
         } else {
             const data = await response.json();

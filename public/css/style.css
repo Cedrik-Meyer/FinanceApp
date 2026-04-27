@@ -483,6 +483,7 @@ button:disabled {
 }
 
 .auth-switch {
+    display: none;
     margin-top: 1rem;
     font-size: 0.9rem;
 }
